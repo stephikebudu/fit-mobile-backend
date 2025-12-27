@@ -53,3 +53,12 @@ exports.acceptedCodeSchema = Joi.object({
     }),
   providedCode: Joi.number().required()
 });
+
+exports.changePasswordSchema = Joi.object({
+  newPassword: Joi.string()
+    .required()
+    .pattern(passwordRegex),
+  oldPassword: Joi.string()
+    .required()
+    .pattern(passwordRegex),
+})
