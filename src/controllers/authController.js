@@ -1,5 +1,5 @@
 const { doHash, doHashValidation, hmacProcess } = require("../../src/utils/hashing");
-const { signupSchema, signinSchema } = require("../../src/middleware/validator");
+const { signupSchema, signinSchema, changePasswordSchema } = require("../../src/middleware/validator");
 const User = require("../../src/models/User");
 const jwt = require("jsonwebtoken");
 const { transport } = require("../../src/middleware/sendMail");
@@ -182,5 +182,45 @@ exports.verifyVerificationCode = async (req, res) => {
   } catch (error) {
     console.log(error)
     return res.status(400).json({ success: false, message: "The worst case scenario has literally happened :/" })
+  }
+}
+
+exports.changePassword = async (req, res) => {
+  const { userId, verified } = req.user;
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    const { error, value } = changePasswordSchema.validate({ oldPassword, newPassword });
+    if (error) {
+      return res.status(401)
+        .json({ success: false, message: error.details[0].message });
+    }
+
+    // FIXME: uncomment codeblock below after rectifying verification APIs so user must be verified before they can change their password.
+    // if (!verified) {
+    //   return res.status(401)
+    //     .json({ success: false, message: "User is not verified!" });
+    // }
+
+    const existingUser = await User.findOne({ _id: userId }).select("+password");
+    if (!existingUser) {
+      return res.status(401)
+        .json({ success: false, message: "User does not exist!" });
+    }
+
+    const result = await doHashValidation(oldPassword, existingUser.password)
+    if (!result) {
+      return res.status(401)
+        .json({ success: false, message: "Invalid credentials!" })
+    }
+
+    const hashedPassword = await doHash(newPassword, 12);
+    existingUser.password = hashedPassword;
+    await existingUser.save();
+
+    return res.status(200)
+      .json({ success: true, message: "Password updated!" })
+  } catch (error) {
+    console.log(error)
   }
 }
