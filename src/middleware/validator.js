@@ -42,3 +42,14 @@ exports.signinSchema = Joi.object({
     .required()
     .pattern(passwordRegex),
 });
+
+exports.acceptedCodeSchema = Joi.object({
+  email: Joi.string()
+    .min(6)
+    .max(60)
+    .required()
+    .email({
+      tlds: { allow: ["com", "net"] },
+    }),
+  providedCode: Joi.number().required()
+});
