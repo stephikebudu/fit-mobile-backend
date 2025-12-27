@@ -1,7 +1,8 @@
-const { doHash, doHashValidation } = require("../../src/utils/hashing");
+const { doHash, doHashValidation, hmacProcess } = require("../../src/utils/hashing");
 const { signupSchema, signinSchema } = require("../../src/middleware/validator");
 const User = require("../../src/models/User");
 const jwt = require("jsonwebtoken");
+const { transport } = require("../../src/middleware/sendMail");
 
 exports.signup = async (req, res) => {
   const { email, password, firstName, lastName, role } = req.body;
@@ -86,4 +87,50 @@ exports.signout = async (req, res) => {
       success: true,
       message: "Sign out successful!"
     });
+}
+
+exports.sendVerificationCode = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ email });
+
+    if (!existingUser) {
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "User does not exist!"
+        });
+    }
+
+    if (existingUser.verified) {
+      return res
+        .status(400)
+        .json({
+          success: true,
+          message: "You are already verified!"
+        });
+    }
+
+    const codeValue = (Math.floor(Math.random() * 10000)).toString();
+
+    let info = await transport.sendMail({
+      from: process.env.NODE_VERIFICATION_CODE_EMAIL,
+      to: existingUser.email,
+      subject: "Fit Mobile: Verify Your Email",
+      html: "<h1>" + codeValue + "</h1>"
+    });
+
+    if (info.accepted[0] === existingUser.email) {
+      const hashedCodeValue = hmacProcess(codeValue, process.env.HMAC_VERIFICATION_CODE_SECRET)
+      existingUser.verificationCode = hashedCodeValue;
+      existingUser.verificationCodeValidation = Date.now();
+      await existingUser.save();
+      return res.status(200).json({ success: true, message: "Verification code sent!" })
+    }
+    res.status(400).json({ success: false, message: "Code not sent, try again."})
+  } catch (error) {
+    console.log(error);
+  }
 }
