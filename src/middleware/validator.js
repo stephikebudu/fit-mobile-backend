@@ -61,4 +61,18 @@ exports.changePasswordSchema = Joi.object({
   oldPassword: Joi.string()
     .required()
     .pattern(passwordRegex),
+});
+
+exports.acceptFPCodeSchema = Joi.object({
+  email: Joi.string()
+    .min(6)
+    .max(60)
+    .required()
+    .email({
+      tlds: { allow: ["com", "net"] },
+    }),
+  providedCode: Joi.number().required(),
+  newPassword: Joi.string()
+    .required()
+    .pattern(passwordRegex)
 })
