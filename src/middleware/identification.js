@@ -22,6 +22,10 @@ exports.identifier = (req, res, next) => {
       throw new Error("error in the token");
     }
   } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: "User not authorized"
+    });
     console.log(error);
   }
 }
