@@ -41,6 +41,60 @@ const userSchema = mongoose.Schema({
     trim: true,
     minLength: 2,
   },
+  username: {
+    type: String,
+    default: `user${Math.floor((Math.random() * 10000))}`
+  },
+  gender: {
+    type: String,
+    enum: ["Man", "Woman", "Rather not say"],
+    default: "Rather not say",
+  },
+  bio: {
+    type: String,
+    default: "",
+  },
+  address: {
+    type: String,
+    default: "",
+  },
+  bankDetails: {
+    accountNumber: {
+      type: String,
+      minLength: 8,
+      maxLength: 12,
+    },
+    accountName: {
+      type: String,
+      default: ""
+    },
+    bankName: {
+      type: String,
+      default: ""
+    }
+  },
+  profileImage: {
+    type: String,
+    default: "",
+  },
+  socialLinks: {
+    tiktok: {
+      type: String,
+      default: "",
+    },
+    instagram: {
+      type: String,
+      default: "",
+    },
+    facebook: {
+      type: String,
+      default: "",
+    },
+    snapchat: {
+      type: String,
+      default: "",
+    },
+  },
   verified: {
     type: Boolean,
     default: false,
@@ -60,7 +114,8 @@ const userSchema = mongoose.Schema({
   forgotPasswordCodeValidation: {
     type: Number,
     select: false,
-  }
+  },
+
 }, {
   timestamps: true,
 });
