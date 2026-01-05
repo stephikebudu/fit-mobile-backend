@@ -96,3 +96,61 @@ exports.updateUserProfile = async (req, res) => {
     });
   }
 }
+
+exports.updateUserSocialLinks = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication failed!"
+      });
+    }
+
+    const userId = req.user.id;
+    const body = req.body || {};
+    console.log(req.body);
+    const updateQuery = {};
+    if (body.hasOwnProperty("tiktok")) updateQuery["socialLinks.tiktok"] = body.tiktok;
+    if (body.hasOwnProperty("instagram")) updateQuery["socialLinks.instagram"] = body.instagram;
+    if (body.hasOwnProperty("facebook")) updateQuery["socialLinks.facebook"] = body.facebook;
+    if (body.hasOwnProperty("snapchat")) updateQuery["socialLinks.snapchat"] = body.snapchat;
+
+    if (Object.keys(updateQuery).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No social links provided for update"
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateQuery },
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found!"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        socialLinks: {
+          tiktok: (updatedUser.socialLinks && updatedUser.socialLinks.tiktok) || "",
+          instagram: (updatedUser.socialLinks && updatedUser.socialLinks.instagram) || "",
+          facebook: (updatedUser.socialLinks && updatedUser.socialLinks.facebook) || "",
+          snapchat: (updatedUser.socialLinks && updatedUser.socialLinks.snapchat) || ""
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Update Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating social links"
+    });
+  }
+}
