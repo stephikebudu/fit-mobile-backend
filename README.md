@@ -11,5 +11,6 @@
 2. For `{{baseUrl}}/api/user-profile/profile` route, update Header with the following key-value pair:
 - `authorization`: `Bearer <user token from signin res obj>`
 
-3. For `{{baseURL}}/api/user-profile/profile/update` route, update Header with the following key-value pair:
+3. For `{{baseURL}}/api/user-profile/profile/update` route, update Header with the following key-value pairs:
 - `authorization`: `Bearer <user token from res object>`
+- `Content-Type`: `application/json`
