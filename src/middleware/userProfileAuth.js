@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { updateUserProfileSchema } = require("../../src/middleware/validator.js");
+const { updateUserProfileSchema, updateSocialLinksSchema } = require("../../src/middleware/validator.js");
 
 exports.userProfileAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -47,7 +47,10 @@ exports.validateUserProfileUpdateAuth = (req, res, next) => {
   const token = authHeader.split(" ")[1];
   try {
     const payload = jwt.verify(token, process.env.TOKEN_SECRET);
-    req.user = { id: payload.id || payload.userId };
+    req.user = {
+      id: payload.id || payload.userId,
+      socialLinks: payload.socialLinks,
+    };
     next();
   } catch (error) {
     console.error("User Authorization Error:", error);
@@ -56,4 +59,21 @@ exports.validateUserProfileUpdateAuth = (req, res, next) => {
       message: "User not authorized"
     });
   }
+}
+
+exports.validateUserSocialLinks = (req, res, next) => {
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Request body is missing or empty"
+    });
+  }
+  const { error } = updateSocialLinksSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message
+    });
+  }
+  next();
 }
