@@ -75,4 +75,14 @@ exports.acceptFPCodeSchema = Joi.object({
   newPassword: Joi.string()
     .required()
     .pattern(passwordRegex)
-})
+});
+
+exports.updateUserProfileSchema = Joi.object({
+  firstName: Joi.string().max(30).optional(),
+  lastName: Joi.string().max(30).optional(),
+  bio: Joi.string().max(200).allow("").optional(),
+  birthdate: Joi.date().iso().optional(),
+  gender: Joi.string().valid("Man", "Woman", "Rather not say").optional(),
+  profileImage: Joi.string().optional(),
+  coverImage: Joi.string().optional(),
+});
