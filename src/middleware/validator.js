@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+
 exports.signupSchema = Joi.object({
   email: Joi.string()
     .min(6)
@@ -85,4 +86,11 @@ exports.updateUserProfileSchema = Joi.object({
   gender: Joi.string().valid("Man", "Woman", "Rather not say").optional(),
   profileImage: Joi.string().optional(),
   coverImage: Joi.string().optional(),
+});
+
+exports.updateSocialLinksSchema = Joi.object({
+  tiktok: Joi.string().allow("").max(100).optional(),
+  instagram: Joi.string().allow("").max(100).optional(),
+  facebook: Joi.string().allow("").max(100).optional(),
+  snapchat: Joi.string().allow("").max(100).optional()
 });
