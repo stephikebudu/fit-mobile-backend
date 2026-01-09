@@ -154,3 +154,67 @@ exports.updateUserSocialLinks = async (req, res) => {
     });
   }
 }
+
+exports.updateUserAddress = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication failed!"
+      });
+    }
+
+    const userId = req.user.id;
+    const body = req.body || {};
+    let updateQuery = {};
+
+    if (body.address && typeof body.address === "string") {
+      updateQuery = {
+        "address.shopAddress": body.address,
+        "address.country": "",
+        "address.state": "",
+        "address.city": "",
+        "address.landmark": ""
+      };
+    } else {
+      const fields = ["country", "state", "city", "shopAddress", "landmark"];
+      fields.forEach(field => {
+        if (body.hasOwnProperty(field)) {
+          updateQuery[`address.${field}`] = body[field];
+        }
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateQuery },
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found in database search!"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        address: {
+          country: updatedUser.address?.country || "",
+          state: updatedUser.address?.state || "",
+          city: updatedUser.address?.city || "",
+          shopAddress: updatedUser.address?.shopAddress || "",
+          landmark: updatedUser.address?.landmark || ""
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Update Address Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating user address"
+    });
+  }
+}
