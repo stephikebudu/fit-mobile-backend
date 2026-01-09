@@ -94,3 +94,12 @@ exports.updateSocialLinksSchema = Joi.object({
   facebook: Joi.string().allow("").max(100).optional(),
   snapchat: Joi.string().allow("").max(100).optional()
 });
+
+exports.updateUserAddressSchema = Joi.object({
+  country: Joi.string().allow("").optional(),
+  state: Joi.string().allow("").optional(),
+  city: Joi.string().allow("").optional(),
+  shopAddress: Joi.string().allow("").optional(),
+  landmark: Joi.string().allow("").optional(),
+  address: Joi.string().allow("").optional()
+}).xor("country", "address");
