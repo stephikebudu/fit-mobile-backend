@@ -114,6 +114,12 @@ const userSchema = mongoose.Schema({
       default: "",
     },
   },
+  selectedActivities: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Activity"
+    }
+  ],
   verified: {
     type: Boolean,
     default: false,
