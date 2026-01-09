@@ -1,5 +1,10 @@
 const jwt = require("jsonwebtoken");
-const { updateUserProfileSchema, updateSocialLinksSchema, updateUserAddressSchema } = require("../../src/middleware/validator.js");
+const {
+  updateUserProfileSchema,
+  updateSocialLinksSchema,
+  updateUserAddressSchema,
+  updateBankDetailsSchema
+} = require("../../src/middleware/validator.js");
 
 exports.userProfileAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -89,5 +94,24 @@ exports.validateUserAddressUpdate = (req, res, next) => {
       message: messageInfo
     });
   }
+  next();
+}
+
+exports.validateBankDetailsUpdate = (req, res, next) => {
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No bank details provided"
+    });
+  }
+
+  const { error } = updateBankDetailsSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message
+    });
+  }
+
   next();
 }
