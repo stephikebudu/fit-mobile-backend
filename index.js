@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 
 const authRouter = require("./src/routers/authRouter")
 const userProfileRouter = require("./src/routers/userProfileRouter");
+const onboardingRouter = require("./src/routers/onboardingRouter");
 
 const app = express();
 app.use(cors());
@@ -24,6 +25,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/user-profile", userProfileRouter);
+app.use("/api/activities", onboardingRouter);
 
 app.get("/", (req, res) => {
   res.json({ msg: "Hello from the server" });
