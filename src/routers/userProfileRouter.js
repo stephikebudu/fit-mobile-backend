@@ -4,12 +4,14 @@ const {
   userProfileAuth,
   validateUserProfileUpdateAuth,
   validateUserProfileUpdate,
-  validateUserSocialLinks
+  validateUserSocialLinks,
+  validateUserAddressUpdate
 } = require("../../src/middleware/userProfileAuth");
 const router = express.Router();
 
 router.get("/profile", userProfileAuth, userProfileController.getUserProfile);
 router.patch("/profile/update", validateUserProfileUpdateAuth, validateUserProfileUpdate, userProfileController.updateUserProfile);
 router.patch("/profile/social-links", validateUserProfileUpdateAuth, validateUserSocialLinks, userProfileController.updateUserSocialLinks);
+router.patch("/profile/address", validateUserProfileUpdateAuth, validateUserAddressUpdate, userProfileController.updateUserAddress);
 
 module.exports = router;
