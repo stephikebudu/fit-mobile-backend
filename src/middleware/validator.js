@@ -1,6 +1,7 @@
 const Joi = require("joi");
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
 const accountNumberRegex = /^[0-9]+$/;
+const activityIdRegex = /^[0-9a-fA-F]{24}$/;
 
 exports.signupSchema = Joi.object({
   email: Joi.string()
@@ -116,4 +117,15 @@ exports.updateBankDetailsSchema = Joi.object({
     "string.max": "Account number is too long"
   }),
   accountName: Joi.string().max(100).optional()
+});
+
+exports.saveUserActivitiesSchema = Joi.object({
+  activityIds: Joi.array()
+    .items(Joi.string().regex(activityIdRegex).message("Invalid activity id format"))
+    .min(1)
+    .required()
+    .messages({
+      "array.min": "Please select at least one activity",
+      "any.required": "activityIds field is required"
+    })
 });
