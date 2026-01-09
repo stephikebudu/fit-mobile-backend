@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+const accountNumberRegex = /^[0-9]+$/;
 
 exports.signupSchema = Joi.object({
   email: Joi.string()
@@ -103,3 +104,16 @@ exports.updateUserAddressSchema = Joi.object({
   landmark: Joi.string().allow("").optional(),
   address: Joi.string().allow("").optional()
 }).xor("country", "address");
+
+exports.updateBankDetailsSchema = Joi.object({
+  accountType: Joi.string().max(20).optional().messages({
+    "string.base": "Account type must be a string"
+  }),
+  bankName: Joi.string().max(50).optional(),
+  accountNumber: Joi.string().pattern(accountNumberRegex).min(8).max(12).optional().messages({
+    "string.pattern.base": "Account number must only contain digits",
+    "string.min": "Account number is too short",
+    "string.max": "Account number is too long"
+  }),
+  accountName: Joi.string().max(100).optional()
+});
