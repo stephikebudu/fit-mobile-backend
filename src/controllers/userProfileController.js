@@ -218,3 +218,54 @@ exports.updateUserAddress = async (req, res) => {
     });
   }
 }
+
+exports.updateUserBankDetails = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication failed!"
+      });
+    }
+
+    const userId = req.user.id;
+    const body = req.body || {};
+
+    const updateQuery = {};
+    if (body.hasOwnProperty("accountType")) updateQuery["bankDetails.accountType"] = body.accountType;
+    if (body.hasOwnProperty("bankName")) updateQuery["bankDetails.bankName"] = body.bankName;
+    if (body.hasOwnProperty("accountNumber")) updateQuery["bankDetails.accountNumber"] = body.accountNumber;
+    if (body.hasOwnProperty("accountName")) updateQuery["bankDetails.accountName"] = body.accountName;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateQuery },
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found oin database search!"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        bankDetails: {
+          accountType: updatedUser.bankDetails?.accountType || "",
+          bankName: updatedUser.bankDetails?.bankName || "",
+          accountNumber: updatedUser.bankDetails?.accountNumber || "",
+          accountName: updatedUser.bankDetails?.accountName || ""
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Bank Details Update Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating user's bank details"
+    });
+  }
+}
