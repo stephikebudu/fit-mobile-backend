@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// TODO: Add birthdate, coverImage fields
 const userSchema = mongoose.Schema({
   email: {
     type: String,
@@ -55,8 +56,26 @@ const userSchema = mongoose.Schema({
     default: "",
   },
   address: {
-    type: String,
-    default: "",
+    country: {
+      type: String,
+      default: "",
+    },
+    state: {
+      type: String,
+      default: "",
+    },
+    city: {
+      type: String,
+      default: "",
+    },
+    shopAddress: {
+      type: String,
+      default: "",
+    },
+    landmark: {
+      type: String,
+      default: "",
+    },
   },
   bankDetails: {
     accountNumber: {
