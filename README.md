@@ -22,3 +22,7 @@
 5. For `{{baseURL}}/api/user-profile/profile/address` route, update Heeader fields with the following key-value pairs:
 - `authorization`: `Bearer <user token from res object>`
 - `Content-Type`: `application/json`
+
+6. For `{{baseURL}}/api/activities` route, update Header fields with the following key-value pairs:
+- `authorization`: `Bearer <user token from res object>`
+- `Content-Type`: `application/json`
