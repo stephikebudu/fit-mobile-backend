@@ -4,5 +4,6 @@ const challengeController = require("../../src/controllers/challengeController")
 const { validateUserProfileUpdateAuth } = require("../../src/middleware/userProfileAuth");
 
 router.get("/", validateUserProfileUpdateAuth, challengeController.getChallengesList);
+router.get("/:challengeId", validateUserProfileUpdateAuth, challengeController.getChallengeDetails);
 
 module.exports = router;
