@@ -1,4 +1,6 @@
 const Challenge = require("../../src/models/Challenge");
+const ActivityLog = require("../../src/models/ActivityLog");
+const mongoose = require("mongoose");
 
 exports.getChallengesList = async (req, res) => {
   try {
@@ -77,6 +79,121 @@ exports.getChallengesList = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error fetching challenges list"
+    });
+  }
+}
+
+exports.getChallengeDetails = async (req, res) => {
+  try {
+    const { challengeId } = req.params;
+    const userId = req.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(challengeId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Challenge ID"
+      });
+    }
+
+    const challenge = await Challenge.findById(challengeId).lean();
+    if (!challenge) {
+      return res.status(404).json({
+        success: false,
+        message: "Challenge not found!"
+      });
+    }
+
+    const participantsList = Array.isArray(challenge.participants) ? challenge.participants : [];
+
+    let leaderboard = [];
+    // Search ActivityLogs for all participants within the challenge date range
+    if (participantsList.length > 0) {
+      const leaderboardData = await ActivityLog.aggregate([
+        {
+          $match: {
+            timestamp: {
+              $gte: challenge.startDate,
+              $lte: challenge.endDate
+            },
+            userId: {
+              $in: challenge.participants
+            }
+          }
+        },
+        {
+          $group: {
+            _id: "$userId",
+            totalDistance: {
+              $sum: "$distance"
+            }
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "userInfo"
+          }
+        },
+        {
+          $unwind: "$userInfo"
+        },
+        {
+          $sort: { totalDistance: -1 }
+        },
+        {
+          $limit: 50
+        },
+        {
+          $project: {
+            _id: 0,
+            userId: "$_id",
+            userName: { $concat: ["$userInfo.firstName", " ", "$userInfo.lastName"] },
+            userAvatar: "$userInfo.profileImage",
+            distance: { $round: ["$totalDistance", 2] },
+            unit: { $literal: challenge.unit }
+          }
+        }
+      ]);
+
+      leaderboard = leaderboardData.map((item, index) => ({
+        rank: index + 1,
+        ...item
+      }));
+    }
+
+    const isJoined = participantsList.some(p => p.toString() === userId.toString());
+    const userProgress = leaderboard.find(l => l.userId.toString() === userid.toString());
+    const currentDistance = userProgress ? userProgress.distance : 0.0;
+    const now = new Date();
+    const diffTime = new Date(challenge.endDate) - now;
+    const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: challenge._id,
+        title: challenge.title,
+        description: challenge.description,
+        targetDistance: challenge.targetDistance,
+        currentDistance: currentDistance,
+        unit: challenge.unit,
+        daysLeft: daysLeft > 0 ? daysLeft : 0,
+        participantsCount: challenge.participants.length,
+        icon: challenge.icon,
+        startDate: challenge.startDate,
+        endDate: challenge.endDate,
+        isJoined: isJoined,
+        sponsor: challenge.sponsor,
+        leaderboard: leaderboard.slice(0, 10)
+      }
+    });
+  } catch (error) {
+    console.error("Challenge Details Fetch Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching challenge details"
     });
   }
 }
