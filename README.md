@@ -26,3 +26,16 @@
 6. For `{{baseURL}}/api/activities` route, update Header fields with the following key-value pairs:
 - `authorization`: `Bearer <user token from res object>`
 - `Content-Type`: `application/json`
+
+7. For `{{baseURL}}/api/challenges?tab=Challenges&status=ongoing&page=1&limit=20` route, update:
+Header fields with the following key-value pair:
+- `authorization`: `Bearer <user token from res object>`
+
+Query Parameters fields with the following key-value pairs:
+- `tab`: `"Leaderboard"` | `"Challenges"` (default: "Challenges")
+- `status`: `"ongoing"` | `"upcoming"` | `"completed"` (default: "ongoing")
+- `page`: number (default: 1)
+- `limit` number (default: 20)
+
+8. For `{{baseURL}}/api/challenges/:challengeId` route, update Header field with the following key-value pair:
+- `authorization`: `Bearer <user token from res object>`
