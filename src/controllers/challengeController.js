@@ -197,3 +197,54 @@ exports.getChallengeDetails = async (req, res) => {
     });
   }
 }
+
+exports.joinChallenge = async (req, res) => {
+  try {
+    const { challengeId } = req.params;
+    const userId = req.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(challengeId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Challenge Id"
+      });
+    }
+
+    const challenge = await Challenge.findById(challengeId);
+    if (!challenge) {
+      return res.status(404).json({
+        success: false,
+        message: "Challenge not found!"
+      });
+    }
+
+    const now = new Date();
+    if (challenge.endDate < now) {
+      return res.status(400).json({
+        success: false,
+        message: "This challenge has already ended"
+      })
+    }
+
+    const updatedChallenge = await Challenge.findByIdAndUpdate(
+      challengeId,
+      { $addToSet: { participants: userId } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        challengeId: updatedChallenge._id,
+        isJoined: true,
+        message: "Successfully joined challenge"
+      }
+    });
+  } catch (error) {
+    console.error("Error Joining Challenge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while joining challenge"
+    });
+  }
+}
