@@ -5,5 +5,6 @@ const { validateUserProfileUpdateAuth } = require("../../src/middleware/userProf
 
 router.get("/", validateUserProfileUpdateAuth, challengeController.getChallengesList);
 router.get("/:challengeId", validateUserProfileUpdateAuth, challengeController.getChallengeDetails);
+router.post("/:challengeId/join", validateUserProfileUpdateAuth, challengeController.joinChallenge);
 
 module.exports = router;
