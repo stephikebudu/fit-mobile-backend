@@ -1,7 +1,9 @@
 # Server Setup
 1. Run `npm install` to install all dependencies
 2. Run `npm run dev` to start development server
-3. In Postman, set `{{baseUrl}}` to `http://localhost:5000`
+3. In Postman:
+   - Set `{{baseUrl}}` to `http://localhost:5000` for development env
+   - Set `{{baseUrl}}` to `https://fit-mobile-backend.vercel.app` for production env
 
 # API Tests in Postman
 1. For `{{baseUrl}}/api/auth/change-password` route, update Header with the following key-value pairs:
