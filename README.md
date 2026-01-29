@@ -41,3 +41,7 @@ Query Parameters fields with the following key-value pairs:
 
 8. For `{{baseURL}}/api/challenges/:challengeId` route, update Header field with the following key-value pair:
 - `authorization`: `Bearer <user token from res object>`
+
+
+9. For `{{baseURL}}/api/challenges/:challengeId/join` route, update Header field with the following key-value pair:
+- `authorization`: `Bearer <user token from res object>`
