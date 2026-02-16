@@ -1,6 +1,7 @@
 const Challenge = require("../../src/models/Challenge");
 const ActivityLog = require("../../src/models/ActivityLog");
 const mongoose = require("mongoose");
+// const User = require("../../src/models/User");
 
 exports.getChallengesList = async (req, res) => {
   try {
@@ -70,7 +71,7 @@ exports.getChallengesList = async (req, res) => {
           page,
           limit,
           total,
-          totalPages: Math.ceil(total/limit)
+          totalPages: Math.ceil(total / limit)
         }
       }
     });
@@ -81,7 +82,7 @@ exports.getChallengesList = async (req, res) => {
       message: "Server error fetching challenges list"
     });
   }
-}
+};
 
 exports.getChallengeDetails = async (req, res) => {
   try {
@@ -196,7 +197,7 @@ exports.getChallengeDetails = async (req, res) => {
       message: "Server error while fetching challenge details"
     });
   }
-}
+};
 
 exports.joinChallenge = async (req, res) => {
   try {
@@ -247,4 +248,112 @@ exports.joinChallenge = async (req, res) => {
       message: "Server error while joining challenge"
     });
   }
-}
+};
+
+exports.getChallengeLeaderboard = async (req, res) => {
+  try {
+    const { challengeId } = req.params;
+    let { page = 1, limit = 50 } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+    const skip = (page - 1) * limit;
+
+    if (!mongoose.Types.ObjectId.isValid(challengeId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Challenge ID"
+      });
+    }
+
+    const challenge = await Challenge.findById(challengeId).lean();
+    if (!challenge) {
+      return res.status(404).json({
+        success: false,
+        message: "Challenge not found"
+      })
+    }
+
+    const participantsList = Array.isArray(challenge.participants) ? challenge.participants : [];
+    if (participantsList.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          leaderboard: [],
+          pagination: { page, limit, total: 0, totalPages: 0 }
+        }
+      });
+    }
+
+    const leaderboardData = await ActivityLog.aggregate([
+      {
+        $match: {
+          timestamp: { $gte: challenge.startDate, $lte: challenge.endDate },
+          userId: { $in: participantsList }
+        }
+      },
+      {
+        $group: {
+          _id: "$userId",
+          totalDistance: { $sum: "$distance" }
+        }
+      },
+      { $sort: { totalDistance: -1 } },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [
+            { $skip: skip },
+            { $limit: limit },
+            {
+              $lookup: {
+                from: "users",
+                localField: "_id",
+                foreignField: "_id",
+                as: "userInfo"
+              }
+            },
+            { $unwind: "$userInfo" },
+            {
+              $project: {
+                _id: 0,
+                userId: "$_id",
+                userName: { $concat: ["$userInfo.firstName", " ", "$userInfo.lastName"] },
+                userAvatar: "$userInfo.profileImage",
+                distance: { $round: ["$totalDistance", 1] },
+                unit: { $literal: (challenge.unit || "km") }
+              }
+            }
+          ]
+        }
+      },
+    ]);
+
+    const results = leaderboardData[0].data;
+    const total = leaderboardData[0].metadata[0]?.total || 0;
+
+    const leaderboard = results.map((item, index) => ({
+      rank: skip + index + 1,
+      ...item
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        leaderboard,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
+    })
+  } catch (error) {
+    console.error("Leaderboard Fetch Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error fetching leaderboard"
+    });
+  }
+};
