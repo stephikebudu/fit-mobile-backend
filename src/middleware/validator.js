@@ -129,3 +129,26 @@ exports.saveUserActivitiesSchema = Joi.object({
       "any.required": "activityIds field is required"
     })
 });
+
+exports.leaderboardSchema = Joi.object({
+  params: Joi.object({
+    challengeId: Joi.string().required().messages({
+      "any.required": "Challenge ID is required"
+    })
+  }),
+  query: Joi.object({
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(50)
+  })
+});
+
+exports.getProductsSchema = Joi.object({
+  category: Joi.string().valid("GEARS", "SUPPLEMENTS", "PLANS"),
+  vendorId: Joi.string(),
+  search: Joi.string(),
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(20),
+  sortBy: Joi.string()
+    .valid("price_asc", "price_desc", "newest", "popular")
+    .default("newest")
+});
