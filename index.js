@@ -27,11 +27,13 @@ const authRouter = require("./src/routers/authRouter")
 const userProfileRouter = require("./src/routers/userProfileRouter");
 const onboardingRouter = require("./src/routers/onboardingRouter");
 const challengeRouter = require("./src/routers/challengeRouter");
+const productRouter = require("./src/routers/productRouter");
 
 app.use("/api/auth", authRouter);
 app.use("/api/user-profile", userProfileRouter);
 app.use("/api/activities", onboardingRouter);
 app.use("/api/challenges", challengeRouter);
+app.use("/api/products", productRouter);
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log("Database connected");
