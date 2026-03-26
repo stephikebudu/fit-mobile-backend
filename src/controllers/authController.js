@@ -5,10 +5,10 @@ const jwt = require("jsonwebtoken");
 const { transport } = require("../../src/middleware/sendMail");
 
 exports.signup = async (req, res) => {
-  const { email, password, firstName, lastName, role } = req.body;
+  const { email, password, username, role } = req.body;
 
   try {
-    const { error, value } = signupSchema.validate({ email, password, firstName, lastName, role });
+    const { error, value } = signupSchema.validate({ email, password, username, role });
 
     if (error) {
       return res.status(401).json({ success: false, message: error.details[0].message });
@@ -18,8 +18,7 @@ exports.signup = async (req, res) => {
     const newUser = new User({
       email,
       password: hashedPassword,
-      firstName,
-      lastName,
+      username,
       role,
     })
     const data = await newUser.save();

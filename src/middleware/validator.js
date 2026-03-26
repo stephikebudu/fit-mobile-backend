@@ -1,4 +1,7 @@
 const Joi = require("joi");
+const validateSchema = require("./productValidator");
+
+
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
 const accountNumberRegex = /^[0-9]+$/;
 const activityIdRegex = /^[0-9a-fA-F]{24}$/;
@@ -15,18 +18,11 @@ exports.signupSchema = Joi.object({
     .required()
     .pattern(passwordRegex)
     .message("Please create strong password"),
-  firstName: Joi.string()
-    .min(2)
+  username: Joi.string()
+    .min(4)
     .max(30)
     .pattern(/[A-Za-z]/)
-    .required()
-    .label("firstName"),
-  lastName: Joi.string()
-    .min(2)
-    .max(30)
-    .pattern(/[A-Za-z]/)
-    .required()
-    .label("lastName"),
+    .label("username"),
   role: Joi.string()
     .required()
     .valid("user", "creator", "vendor")
@@ -151,4 +147,24 @@ exports.getProductsSchema = Joi.object({
   sortBy: Joi.string()
     .valid("price_asc", "price_desc", "newest", "popular")
     .default("newest")
+});
+
+const getProductDetailsSchema = Joi.object({
+  productId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+    'string.pattern.base': 'Invalid Product ID format'
+  })
+});
+
+exports.getProductDetailsValidator = (req, res, next) => {
+  validateSchema(getProductDetailsSchema, req, res, next);
+};
+
+exports.addPaymentMethodSchema = Joi.object({
+  type: Joi.string().valid('card', 'bank_transfer').required(),
+  cardNumber: Joi.string().creditCard().required(),
+  cardHolder: Joi.string().min(3).required(),
+  expiryMonth: Joi.number().integer().min(1).max(12).required(),
+  expiryYear: Joi.number().integer().min(new Date().getFullYear()).required(),
+  cvv: Joi.string().regex(/^[0-9]{3,4}$/).required(),
+  isDefault: Joi.boolean().default(false)
 });

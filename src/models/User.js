@@ -31,19 +31,20 @@ const userSchema = mongoose.Schema({
   firstName: {
     type: String,
     default: "",
-    required: [true, "First name cannot be blank"],
+    required: [false],
     trim: true,
-    minLength: 2,
+    default: "",
   },
   lastName: {
     type: String,
     default: "",
-    required: [true, "Last name cannot be blank"],
+    required: [false],
     trim: true,
-    minLength: 2,
+    default: "",
   },
   username: {
     type: String,
+    required: [true, "Role cannot be blank"],
     default: `user${Math.floor((Math.random() * 10000))}`
   },
   gender: {
