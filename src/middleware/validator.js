@@ -15,7 +15,7 @@ exports.signupSchema = Joi.object({
       tlds: { allow: ["com", "net", "org"] }
     }),
   password: Joi.string()
-    .required()
+    .required() 
     .pattern(passwordRegex)
     .message("Please create strong password"),
   username: Joi.string()
